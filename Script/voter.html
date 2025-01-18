@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voter Dashboard - Register and Vote</title>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffcb74;
+      color: #333;
+    }
+    header {
+      background-color: #2d3436;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      font-size: 2rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    nav {
+      text-align: center;
+      background-color: #34495e;
+      padding: 10px;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 40px;
+      background: linear-gradient(145deg, #f9e79f, #f39c12);
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #f39c12;
+      width: 80%;
+      margin-top: 10px;
+      font-size: 1rem;
+      transition: border 0.3s ease;
+    }
+    input[type="text"]:focus {
+      border: 2px solid #2c3e50;
+      outline: none;
+    }
+    button {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 25px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-top: 30px;
+      transition: background-color 0.3s ease, transform 0.2s;
+    }
+    button:hover {
+      background-color: #34495e;
+      transform: scale(1.05);
+    }
+    .title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #2c3e50;
+      font-weight: bold;
+      text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
+    .candidate {
+      background-color: #16a085;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    .candidate:hover {
+      transform: scale(1.05);
+      background-color: #1abc9c;
+    }
+    .candidate button {
+      background: #16a085;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+    .candidate button:hover {
+      background-color: #1abc9c;
+    }
+  </style>
+</head>
+<body>
+  <header>Singing Competition Voting</header>
+  <nav>
+    <a href="results.html" target="_blank">View Results</a>
+  </nav>
+  <div class="container">
+    <div class="title">Register to Vote</div>
+
+    <div class="form-group">
+      <label for="voterId">Enter Your National ID:</label>
+      <input type="text" id="voterId" placeholder="Enter Your National ID">
+    </div>
+    <button onclick="registerVoter()">Register</button>
+
+    <div class="title">Vote for Your Favorite Candidate</div>
+
+    <!-- Candidate list will be populated here dynamically -->
+    <div id="candidateList"></div>
+  </div>
+
+  <script>
+    let web3;
+    let contract;
+    const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE"; 
+    const contractABI = [ /* Your Contract ABI Here */ ]; 
+
+    async function init() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await web3.eth.getAccounts();
+
+        contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Fetch and display the list of candidates
+        await loadCandidates();
+      } else {
+        alert("Please install MetaMask to use this app.");
+      }
+    }
+
+    async function loadCandidates() {
+      const candidatesCount = await contract.methods.getCandidatesCount().call();
+
+      let candidateListHTML = "";
+      for (let i = 1; i <= candidatesCount; i++) {
+        const candidate = await contract.methods.getCandidate(i).call();
+        candidateListHTML += `
+          <div class="candidate">
+            <span>${candidate.name}</span>
+            <button onclick="vote(${i})">Vote</button>
+          </div>
+        `;
+      }
+
+      document.getElementById('candidateList').innerHTML = candidateListHTML;
+    }
+
+    async function registerVoter() {
+      const voterId = document.getElementById('voterId').value;
+
+      if (!voterId) return alert("Please enter your National ID.");
+
+      const accounts = await web3.eth.getAccounts();
+      await contract.methods.registerVoter(voterId).send({ from: accounts[0] });
+      alert("You are now registered to vote!");
+    }
+
+    async function vote(candidateId) {
+      const accounts = await web3.eth.getAccounts();
+      await contract.methods.vote(candidateId).send({ from: accounts[0] });
+      alert("Your vote has been cast!");
+    }
+
+    init();
+  </script>
+</body>
+</html>
