@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voting Results</title>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #ffcb74;
+      color: #333;
+    }
+    header {
+      background-color: #2d3436;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      font-size: 2rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 40px;
+      background: linear-gradient(145deg, #f9e79f, #f39c12);
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .result-title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #2c3e50;
+      font-weight: bold;
+      text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
+    .candidate {
+      background-color: #16a085;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+    .candidate:hover {
+      transform: scale(1.05);
+      background-color: #1abc9c;
+    }
+    .candidate-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: white;
+    }
+    .vote-count {
+      font-size: 1.2rem;
+      color: white;
+      font-weight: 500;
+    }
+    .footer {
+      font-size: 1rem;
+      margin-top: 50px;
+      color: #333;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>Voting Results - Singing Competition</header>
+
+  <div class="container">
+    <div class="result-title">Voting Results</div>
+
+    <!-- Candidate results will be dynamically populated here -->
+    <div id="resultsContainer"></div>
+
+    <div class="footer">
+      <p>Voting results are updated in real-time. Keep checking for new votes!</p>
+    </div>
+  </div>
+
+  <script>
+    let web3;
+    let contract;
+    const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE"; // Replace with your contract address
+    const contractABI = [ /* Your Contract ABI Here */ ]; // Replace with your contract ABI
+
+    async function init() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await ethereum.request({ method: 'eth_requestAccounts' });
+        contract = new web3.eth.Contract(contractABI, contractAddress);
+        loadResults();
+      } else {
+        alert("Please install MetaMask to use this app.");
+      }
+    }
+
+    async function loadResults() {
+      const candidates = await contract.methods.getCandidates().call(); // Assuming you have this method in your contract
+      const resultsContainer = document.getElementById('resultsContainer');
+      resultsContainer.innerHTML = ''; // Clear previous content
+
+      for (let candidateId of candidates) {
+        const voteCount = await contract.methods.getVoteCount(candidateId).call(); // Assuming this method exists in your contract
+        const candidateElement = document.createElement('div');
+        candidateElement.className = 'candidate';
+
+        candidateElement.innerHTML = `
+          <div class="candidate-name">Candidate ${candidateId}</div>
+          <div class="vote-count">Votes: ${voteCount}</div>
+        `;
+
+        resultsContainer.appendChild(candidateElement);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
