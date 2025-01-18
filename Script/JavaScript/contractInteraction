@@ -1,0 +1,264 @@
+// contractInteraction.js
+
+let web3;
+let contract;
+
+// Replace these with your contract's actual details
+const contractAddress = "0xa6614901Ed0f8B1432D6E90356044C019a9d8691";  // Replace with the deployed contract address on Hardhat
+const abi = [
+  {
+    "inputs": [],
+    "name": "endVoting",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_nationalId",
+        "type": "string"
+      }
+    ],
+    "name": "registerCandidate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_nationalId",
+        "type": "string"
+      }
+    ],
+    "name": "registerVoter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "startVoting",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_voterId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_candidateId",
+        "type": "string"
+      }
+    ],
+    "name": "vote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "admin",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "candidates",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "nationalId",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "votes",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "registered",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCandidates",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSummary",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalVotes",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalCandidates",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getWinner",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "winnerName",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "voteCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "name": "voters",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "nationalId",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "registered",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "hasVoted",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "votingEnded",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "votingStarted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+// Connect to the Hardhat network using Web3
+async function connectHardhat() {
+    // Use Web3 to connect to the local Hardhat network
+    web3 = new Web3("http://127.0.0.1:8545");  // Local Hardhat network
+
+    // Get the list of accounts from the Hardhat network
+    const accounts = await web3.eth.getAccounts();
+    console.log("Connected to Hardhat with accounts:", accounts);
+    
+    // You can assign the first account as the default account
+    const defaultAccount = accounts[0];
+    console.log("Using account:", defaultAccount);
+    
+    // Initialize the contract
+    contract = new web3.eth.Contract(abi, contractAddress);
+    
+    return defaultAccount;  // Return the default account
+}
+
+// Admin: Add a voter to the contract
+async function addVoter(voterAddress) {
+    const accounts = await web3.eth.getAccounts();
+    await contract.methods.addVoter(voterAddress).send({ from: accounts[0] });
+    alert(`Voter ${voterAddress} has been added!`);
+}
+
+// Voter: Cast a vote for a candidate
+async function vote(candidateName) {
+    const accounts = await web3.eth.getAccounts();
+    await contract.methods.vote(candidateName).send({ from: accounts[0] });
+    alert(`You voted for ${candidateName}!`);
+}
+
+// Export functions for use in HTML
+export { connectHardhat, addVoter, vote };
