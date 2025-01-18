@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting System</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <script type="module" src="contractInteraction.js"></script>
+</head>
+<body>
+    <h1>Voting System</h1>
+    <button id="connectButton">Connect to Hardhat</button>
+    <div id="adminActions" style="display: none;">
+        <h2>Admin Actions</h2>
+        <input type="text" id="voterAddress" placeholder="Enter Voter Address">
+        <button id="addVoterButton">Add Voter</button>
+    </div>
+    <div id="voterActions" style="display: none;">
+        <h2>Voter Actions</h2>
+        <input type="text" id="candidateName" placeholder="Enter Candidate Name">
+        <button id="voteButton">Vote</button>
+    </div>
+
+    <script type="module">
+        import { connectHardhat, addVoter, vote } from './contractInteraction.js';
+
+        document.getElementById("connectButton").onclick = async function() {
+            const userAddress = await connectHardhat();
+            // Check if user is admin and show relevant actions
+            if (userAddress === "adminAddress") {  // Replace "adminAddress" with your actual admin address
+                document.getElementById("adminActions").style.display = "block";
+            } else {
+                document.getElementById("voterActions").style.display = "block";
+            }
+        };
+
+        document.getElementById("addVoterButton").onclick = async function() {
+            const voterAddress = document.getElementById("voterAddress").value;
+            await addVoter(voterAddress);
+        };
+
+        document.getElementById("voteButton").onclick = async function() {
+            const candidateName = document.getElementById("candidateName").value;
+            await vote(candidateName);
+        };
+    </script>
+</body>
+</html>
+
