@@ -110,6 +110,9 @@
     }
     .candidate button:hover {
       background-color: #1abc9c;
+    }     
+      .gap {
+        margin: 20px 0;
     }
   </style>
 </head>
@@ -127,11 +130,14 @@
     </div>
     <button onclick="registerVoter()">Register</button>
 
+    <div class="gap"></div>
+
     <div class="title">Vote for Your Favorite Candidate</div>
 
     <!-- Candidate list will be populated here dynamically -->
     <div id="candidateList"></div>
   </div>
+    </div>
 
   <script>
     let web3;
